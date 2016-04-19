@@ -40,7 +40,7 @@ class ArboretumDeck(object):
         self.deck = self.deck[number_of_cards:]
         return hand
 
-    def add(self, cards):
+    def add_cards(self, cards):
         self.deck = cards + self.deck
 
 
@@ -51,8 +51,7 @@ class ArboretumTableau(object):
         self.max_card = max_card
         self.tableau = dict()
 
-    def available_postitions(self):
-
+    def available_positions(self):
         if not self.tableau:
             return [(0, 0)]
 
@@ -95,7 +94,7 @@ class ArboretumTableau(object):
             ]
             neighbors = filter(lambda position: position in self.tableau, neighbors)
 
-            current_path = list(start_card)
+            current_path = [start_card]
             nodes_to_explore = deque(neighbors)
             last_position = start_position
 
@@ -117,7 +116,7 @@ class ArboretumTableau(object):
                     current_path.append(next_card)
                     last_position = next_position
 
-                elif current_path[0].color == current_path[-1].color:
+                elif len(current_path) > 1 and current_path[0].color == current_path[-1].color:
                     # this is a scoreable path
                     same_color_bonus = all([card.color == color for card in current_path]) and len(current_path) > 4
                     starts_on_min = current_path[0].number == self.min_card
