@@ -1,5 +1,6 @@
 import random
 from collections import deque
+from colorama import Back, Fore
 
 
 class EmptyDeckException(Exception):
@@ -7,13 +8,29 @@ class EmptyDeckException(Exception):
 
 
 class Card(object):
+    BG_COLORS = [
+        Back.GREEN,
+        Back.BLUE,
+        Back.RED,
+        Back.WHITE,
+        Back.YELLOW,
+        Back.MAGENTA,
+        Back.CYAN,
+        Back.LIGHTBLACK_EX,
+        Back.LIGHTRED_EX,
+        Back.LIGHTBLUE_EX
+    ]
 
     def __init__(self, number, color):
         self.number = number
         self.color = color
 
     def __str__(self):
-        return '{} {}'.format(self.color, self.number)
+        return '{}{}{}'.format(
+            self.BG_COLORS[self.color] + Fore.BLACK,
+            self.number,
+            Back.RESET + Fore.RESET
+        )
 
     def __repr__(self):
         return str(self)
@@ -39,9 +56,6 @@ class ArboretumDeck(object):
         hand = self.deck[: number_of_cards]
         self.deck = self.deck[number_of_cards:]
         return hand
-
-    def add_cards(self, cards):
-        self.deck = cards + self.deck
 
 
 class ArboretumTableau(object):
@@ -139,3 +153,71 @@ class ArboretumTableau(object):
                     current_path.pop()
 
         return max_score, max_path
+
+    def __str__(self):
+        coords = self.tableau.keys()
+        if not coords:
+            return ''
+
+        xs = map(lambda x: x[0], coords)
+        ys = map(lambda x: x[1], coords)
+
+        min_x = min(xs)
+        max_x = max(xs)
+
+        min_y = min(ys)
+        max_y = max(ys)
+
+        dim_x = max_x - min_x + 0
+        dim_y = max_y - min_y + 1
+
+        tableau_string = ''
+        for ix in range(dim_x):
+            for iy in range(dim_y):
+                tableau_string += str(self.tableau.get((ix + min_x, iy + min_y)) or ' ')
+            tableau_string += '\n'
+
+        return tableau_string
+                
+
+class ArboretumPlayer(object):
+
+    def __init__(self, hand, discard_pile=None):
+        self.hand = hand
+        self.discard_pile = deque([]) if discard_pile is None else deque(discard_pile)
+        self.tableau = ArboretumTableau()
+
+    def add_to_hand(self, cards):
+        self.hand.extend(cards)
+
+    @property
+    def top_discard(self):
+        if self.discard_pile:
+            return self.discard_pile[-1]
+        else:
+            None
+
+    def print_state(self):
+        self.hand.sort(key = lambda x: (x.color, x.number))
+        print 'Hand: {}'.format('{}'.format(''.join(map(str, self.hand))))
+        print 'Discard {:s}'.format(self.top_discard or 'X')
+        print 'Tableau:\n{:s}'.format(self.tableau)
+
+
+class ArboretumGame(object):
+
+    def __init__(self, num_players):
+        self.deck = ArboretumDeck(num_players=num_players)
+        self.deck.shuffle()
+
+        hands  = [self.deck.draw(7) for i in range(num_players)]
+        discard_piles = [None] + [self.deck.draw(1) for i in range(num_players - 1)]
+
+        self.players = [ArboretumPlayer(hand=hand, discard_pile=discard_pile)
+            for hand, discard_pile in zip(hands, discard_piles)]
+
+    def print_state(self):
+        for i, player in enumerate(self.players):
+            print('Player {}'.format(i))
+            player.print_state()
+            print(30 * '-')

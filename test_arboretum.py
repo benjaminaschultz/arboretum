@@ -1,15 +1,16 @@
-from arboretum import ArboretumDeck, ArboretumTableau
+import random
+from arboretum import ArboretumDeck, ArboretumTableau, ArboretumGame
 
-deck = ArboretumDeck()
-tableau = ArboretumTableau()
+game =  ArboretumGame(4)
+for player in game.players:
+    player.add_to_hand(game.deck.draw(10))
+    for card in player.hand[0:10]:
+        positions = player.tableau.available_positions()
+        random.shuffle(positions)
+        position = positions[0]
+        player.tableau.add_card(card=card, position=position)
 
-hand = deck.draw(7)
-hand = sorted(hand, key=lambda x: (x.number, x.color))
+    player.hand = player.hand[-7:]
+        
+game.print_state()
 
-while hand:
-    card = hand.pop()
-    position = tableau.available_positions()[0]
-    tableau.add_card(card=card, position=position)
-
-for color in range(10):
-    print(color, tableau.score(color))
