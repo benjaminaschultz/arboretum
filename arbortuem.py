@@ -33,7 +33,7 @@ class ArboretumDeck(object):
         random.shuffle(self.deck)
 
     def draw(self, number_of_cards):
-        if len(self.deck):
+        if len(self.deck) == 0:
             raise EmptyDeckException()
 
         hand = self.deck[: number_of_cards]
