@@ -49,6 +49,12 @@ class ArboretumDeck(object):
     def shuffle(self):
         random.shuffle(self.deck)
 
+    def __len__(self):
+        return len(self.deck)
+
+    def pop(self):
+        return self.draw(1)
+
     def draw(self, number_of_cards):
         if len(self.deck) == 0:
             raise EmptyDeckException()
@@ -178,7 +184,16 @@ class ArboretumTableau(object):
             tableau_string += '\n'
 
         return tableau_string
-                
+
+
+class ArboretumTurn(object):
+
+    def __init__(
+        draws,
+        card_to_play,
+        card_to_discard
+        )
+
 
 class ArboretumPlayer(object):
 
@@ -215,6 +230,14 @@ class ArboretumGame(object):
 
         self.players = [ArboretumPlayer(hand=hand, discard_pile=discard_pile)
             for hand, discard_pile in zip(hands, discard_piles)]
+
+        self.current_player_number = 0
+
+    def get_moves(self):
+        draw_options = list()
+        draw_decks = list()
+        first_draw_options = None
+
 
     def print_state(self):
         for i, player in enumerate(self.players):
